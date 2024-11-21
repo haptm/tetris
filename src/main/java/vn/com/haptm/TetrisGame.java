@@ -13,9 +13,9 @@ import vn.com.haptm.inputs.Inputs;
 import vn.com.haptm.mat4f.Mat4f;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
@@ -57,12 +57,7 @@ public class TetrisGame {
         try {
             BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/highScore.txt"));
             String line =  reader.readLine();
-            if (line == null) {
-                highScore = "0";
-            }
-            else {
-                highScore = line;
-            }
+            highScore = Objects.requireNonNullElse(line, "0");
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -278,8 +273,8 @@ public class TetrisGame {
     private static Label createGameOverLabel() {
         final Label label = new Label();
         label.text = "GAME\nOVER";
-        label.x = 5 + BOARD_WIDTH / 2;
-        label.y = 1 + BOARD_HEIGHT / 2;
+        label.x = 5 + (float) BOARD_WIDTH / 2;
+        label.y = 1 + (float) BOARD_HEIGHT / 2;
         label.vSpacing = 1;
         label.size = 3;
         label.hAlign = Label.HAlign.CENTER;

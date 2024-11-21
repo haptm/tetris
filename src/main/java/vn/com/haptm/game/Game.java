@@ -217,12 +217,12 @@ public class Game {
 
     private void updateInMoveX() {
         if (in.moveX != 0) {
-            player.x += in.moveX;
+            player.x += (int) in.moveX;
             if (board.checkPlayer(player)) {
                 calcShadow();
                 return;
             }
-            player.x -= in.moveX;
+            player.x -= (int) in.moveX;
         }
     }
 
