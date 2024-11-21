@@ -1,5 +1,11 @@
 package vn.com.haptm.game;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class Game {
     private static final Shape[] SHAPES;
 
@@ -57,20 +63,48 @@ public class Game {
     public final Shape hold;
     public final Shape tempShape;
     public int level;
-    public int count; // số lượng hàng đã xoá
+    public int count;
     public float time;
     public int score;
     // thời gian trễ giữa các lần rơi
     public float fallCD;
     // thời gian trễ khi xoá các hàng
     public float clearCD;
-    // thời gian tính từ khi hàng bị xoá
+    // thời gian khi hàng bị xoá
     public float clearTime;
     public int clearY0;
     public int clearY1;
     public Shape next;
     public boolean canHold;
     public boolean gameOver;
+    private int highScore;
+
+    private int readHighScore() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/highScore.txt"))) {
+            String line = reader.readLine();
+            if (line != null) {
+                return Integer.parseInt(line.trim());
+            }
+        } catch (IOException | NumberFormatException e) {
+            return 0;
+        }
+        return 0;
+    }
+
+    private void writeHighScore() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/highScore.txt"))) {
+            writer.write(String.valueOf(this.highScore));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateHighScore() {
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            writeHighScore();
+        }
+    }
 
     public Game(Config config) {
         in = new In();
@@ -79,6 +113,7 @@ public class Game {
         shadow = new Player();
         hold = new Shape();
         tempShape = new Shape();
+        highScore = readHighScore();
         reset();
     }
 
@@ -124,6 +159,7 @@ public class Game {
 
     // đặt shape vào vị trí của player
     private void setPlayer(Shape shape) {
+        updateHighScore();
         player.set(shape);
         player.x = (board.width - player.size) / 2;
         player.y = (board.height - player.size) / 2;
@@ -138,14 +174,11 @@ public class Game {
     private void placePlayer() {
         if (player.size > 0) {
             final int rows = board.placePlayer(player);
-            count++;
-            if (count % 8 == 0)
-                if (level < 99)
-                    level++;
-            score += 1 << rows * 2;
+            score += rows * 10;
+            if (score >= 100) level++;
             if (rows > 0) {
                 clearTime = this.time;
-                clearCD = .6f;
+                clearCD = .4f;
                 clearY0 = this.player.y;
                 clearY1 = this.player.y + this.player.size - 1;
                 player.reset();
@@ -153,6 +186,7 @@ public class Game {
                 return;
             }
         }
+
         setPlayer(next);
         next = randomShape();
         canHold = true;
@@ -169,11 +203,11 @@ public class Game {
             return;
         time += delta;
         if (clearCD == 0) {
-            updateInMoveX(delta);
-            updateInRotate(delta);
-            updateInFall(delta);
-            updateInDrop(delta);
-            updateInHold(delta);
+            updateInMoveX();
+            updateInRotate();
+            updateInFall();
+            updateInDrop();
+            updateInHold();
             updateFall(delta);
         } else {
             updateClear(delta);
@@ -181,7 +215,7 @@ public class Game {
         in.reset();
     }
 
-    private void updateInMoveX(float delta) {
+    private void updateInMoveX() {
         if (in.moveX != 0) {
             player.x += in.moveX;
             if (board.checkPlayer(player)) {
@@ -192,7 +226,7 @@ public class Game {
         }
     }
 
-    private void updateInRotate(float delta) {
+    private void updateInRotate() {
         if (in.rotate != 0) {
             player.rotate(in.rotate);
             if (board.checkPlayer(player)) {
@@ -203,20 +237,20 @@ public class Game {
         }
     }
 
-    private void updateInFall(float delta) {
+    private void updateInFall() {
         if (in.fall) {
             fallCD = 0;
         }
     }
 
-    private void updateInDrop(float delta) {
+    private void updateInDrop() {
         if (in.drop) {
             fallCD = 0;
             player.set(shadow);
         }
     }
 
-    private void updateInHold(float delta) {
+    private void updateInHold() {
         if (in.hold) {
             if (!canHold)
                 return;

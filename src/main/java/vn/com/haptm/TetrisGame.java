@@ -12,6 +12,11 @@ import vn.com.haptm.graphics.Texture;
 import vn.com.haptm.inputs.Inputs;
 import vn.com.haptm.mat4f.Mat4f;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
@@ -40,13 +45,30 @@ public class TetrisGame {
     // Ma trận chiếu
     private static final Mat4f projection = new Mat4f();
     private static Texture texture;
-    private static Texture texture1;
     private static Game tetris;
     private static Sprites sprites;
     private static Labels labels;
     // render theo batch
     private static Batch batch;
     private static boolean paused;
+
+    public static String getHighScore() {
+        String highScore;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/highScore.txt"));
+            String line =  reader.readLine();
+            if (line == null) {
+                highScore = "0";
+            }
+            else {
+                highScore = line;
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return highScore;
+    }
 
     public static String formatTime(double t) {
         var s = (int) t;
@@ -113,6 +135,7 @@ public class TetrisGame {
         return sprite;
     }
 
+    // khung board
     private static Sprite createBoardBGPieceSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 8, 8);
@@ -120,6 +143,7 @@ public class TetrisGame {
         return sprite;
     }
 
+    // shape trong next và hold
     private static Sprite createBoardFGPieceSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 8, 8);
@@ -148,60 +172,84 @@ public class TetrisGame {
     private static Label createTimeLabel() {
         final Label label = new Label();
         label.text = "TIME";
-        label.x = 4.5f;
-        label.y = BOARD_HEIGHT - 2;
+        label.x = 2f;
+        label.y = BOARD_HEIGHT - 0.8f;
         label.size = .5f;
         label.hAlign = Label.HAlign.RIGHT;
-        label.color.set(.5f, .6f, .5f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
     private static Label createTimeValueLabel() {
         final Label label = new Label();
         label.x = 4.5f;
-        label.y = BOARD_HEIGHT - 3;
+        label.y = BOARD_HEIGHT - 1.5f;
+        label.size = .5f;
         label.hAlign = Label.HAlign.RIGHT;
-        label.color.set(.9f, 1, .9f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
     private static Label createScoreLabel() {
         final Label label = new Label();
         label.text = "SCORE";
-        label.x = 4.5f;
-        label.y = BOARD_HEIGHT - 4;
+        label.x = 2.4f;
+        label.y = BOARD_HEIGHT - 2.8f;
         label.size = .5f;
         label.hAlign = Label.HAlign.RIGHT;
-        label.color.set(.5f, .6f, .5f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
     private static Label createScoreValueLabel() {
         final Label label = new Label();
         label.x = 4.5f;
-        label.y = BOARD_HEIGHT - 5;
+        label.y = BOARD_HEIGHT - 3.5f;
         label.hAlign = Label.HAlign.RIGHT;
-        label.color.set(.9f, 1, .9f);
+        label.size = .5f;
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
     private static Label createLevelLabel() {
         final Label label = new Label();
         label.text = "LEVEL";
-        label.x = 4.5f;
-        label.y = BOARD_HEIGHT - 6;
+        label.x = 2.4f;
+        label.y = BOARD_HEIGHT - 4.8f;
         label.size = .5f;
         label.hAlign = Label.HAlign.RIGHT;
-        label.color.set(.5f, .6f, .5f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
     private static Label createLevelValueLabel() {
         final Label label = new Label();
         label.x = 4.5f;
-        label.y = BOARD_HEIGHT - 7;
+        label.y = BOARD_HEIGHT - 5.5f;
         label.hAlign = Label.HAlign.RIGHT;
-        label.color.set(.9f, 1, .9f);
+        label.size = .5f;
+        label.color.set(1f, 1f, 1f);
+        return label;
+    }
+
+    private static Label createHighScoreLabel() {
+        final Label label = new Label();
+        label.text = "HIGH SCORE";
+        label.x = 4.3f;
+        label.y = BOARD_HEIGHT - 6.8f;
+        label.size = .5f;
+        label.hAlign = Label.HAlign.RIGHT;
+        label.color.set(1f, 1f, 1f);
+        return label;
+    }
+
+    private static Label createHighScoreValueLabel() {
+        final Label label = new Label();
+        label.x = 4.5f;
+        label.y = BOARD_HEIGHT - 7.5f;
+        label.hAlign = Label.HAlign.RIGHT;
+        label.size = .5f;
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
@@ -210,9 +258,9 @@ public class TetrisGame {
         label.text = "NEXT";
         label.x = 0;
         label.y = 5.25f;
-        label.size = .75f;
+        label.size = .65f;
         label.hAlign = Label.HAlign.LEFT;
-        label.color.set(.5f, .6f, .5f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
@@ -221,9 +269,9 @@ public class TetrisGame {
         label.text = "HOLD";
         label.x = 0;
         label.y = 11.5f;
-        label.size = .75f;
+        label.size = .65f;
         label.hAlign = Label.HAlign.LEFT;
-        label.color.set(.5f, .6f, .5f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
@@ -235,7 +283,7 @@ public class TetrisGame {
         label.vSpacing = 1;
         label.size = 3;
         label.hAlign = Label.HAlign.CENTER;
-        label.color.set(.5f, 1, .5f);
+        label.color.set(1f, 1f, 1f);
         return label;
     }
 
@@ -344,6 +392,12 @@ public class TetrisGame {
         batch.draw(labels.levelValue);
     }
 
+    public static void renderHighScore() {
+        labels.highScoreValue.text = getHighScore();
+        batch.draw(labels.highScore);
+        batch.draw(labels.highScoreValue);
+    }
+
     public static void renderNext() {
         batch.draw(labels.next);
     }
@@ -357,22 +411,9 @@ public class TetrisGame {
     }
 
     public static void render(double time) {
-        var i1 = (float) Math.abs(Math.cos(.7 * time));
-        var i2 = (float) Math.abs(Math.sin(1.7 * time));
-        var i3 = 4 * (tetris.time - tetris.clearTime);
-        float i4;
-        sprites.pieces.player.color.set(.4f, .1f * i1 + .5f, .4f);
-        sprites.pieces.shadow.color.set(.6f, .8f, .6f);
-        sprites.pieces.shadow.alpha = .4f + .1f * i2;
-        if (i3 < .5f) {
-            i4 = i3 * 2;
-            sprites.pieces.clear.color.set(.5f * i4, .1f + .9f * i4, .5f * i4);
-            sprites.pieces.clear.alpha = 1;
-        } else {
-            i4 = Math.max(0, 1.5f - i3);
-            sprites.pieces.clear.color.set(.5f, 1f, .5f);
-            sprites.pieces.clear.alpha = i4;
-        }
+        sprites.pieces.player.color.set(0f, 0.0f, 1f);
+        sprites.pieces.shadow.color.set(0f, 0.0f, 1f);
+        sprites.pieces.shadow.alpha = .5f;
 
         glClear(GL_COLOR_BUFFER_BIT);
         batch.begin();
@@ -397,6 +438,7 @@ public class TetrisGame {
         renderLevel();
         renderNext();
         renderHold();
+        renderHighScore();
 
         batch.end();
     }
@@ -439,5 +481,7 @@ public class TetrisGame {
         public Label next = createNextLabel();
         public Label hold = createHoldLabel();
         public Label gameOver = createGameOverLabel();
+        public Label highScore = createHighScoreLabel();
+        public Label highScoreValue = createHighScoreValueLabel();
     }
 }
