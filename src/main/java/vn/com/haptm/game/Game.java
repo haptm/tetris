@@ -106,9 +106,9 @@ public class Game {
         }
     }
 
-    public Game(Config config) {
+    public Game() {
         in = new In();
-        board = new Board(config.board);
+        board = new Board(10, 20);
         player = new Player();
         shadow = new Player();
         hold = new Shape();
@@ -312,9 +312,5 @@ public class Game {
             drop = false;
             hold = false;
         }
-    }
-
-    public static class Config {
-        public Board.Config board = new Board.Config();
     }
 }

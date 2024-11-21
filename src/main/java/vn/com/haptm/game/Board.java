@@ -7,10 +7,10 @@ public class Board {
     public final int height;
     public final boolean[][] cells;
 
-    public Board(Config config) {
-        width = config.width;
-        height = config.height;
-        cells = new boolean[height][width];
+    public Board(int width, int height) {
+        this.width = width;
+        this.height = height;
+        cells = new boolean[this.height][this.width];
     }
 
     public void reset() {
@@ -92,11 +92,6 @@ public class Board {
                 rows++;
         }
         return rows;
-    }
-
-    public static class Config {
-        public int width = 10;
-        public int height = 20;
     }
 }
 

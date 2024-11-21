@@ -140,34 +140,6 @@ public class Shader {
         glUseProgram(0);
     }
 
-    private int createShader(String resource) {
-        final String ext = resource.substring(resource.lastIndexOf(".") + 1);
-        final String source = ResourceManager.getString(resource);
-        int type = 0;
-        switch (ext) {
-            case "vert":
-                type = GL_VERTEX_SHADER;
-                break;
-            case "frag":
-                type = GL_FRAGMENT_SHADER;
-                break;
-            default:
-                System.err.println("Invalid shader type: " + ext);
-                break;
-        }
-        final int shader = glCreateShader(type);
-        glShaderSource(shader, source);
-        glCompileShader(shader);
-        final int status = glGetShaderi(shader, GL_COMPILE_STATUS);
-        if (status != GL_TRUE) {
-            final String infoLog = glGetShaderInfoLog(shader);
-            System.err.println("Error compiling shader: " + infoLog);
-            glDeleteShader(shader);
-            return 0;
-        }
-        return shader;
-    }
-
     public void bind() {
         if (binded == program)
             return;

@@ -17,20 +17,8 @@ public final class ResourceManager {
     private ResourceManager() {
     }
 
-    public static URL get(String resource) {
-        return Thread.currentThread().getContextClassLoader().getResource(resource);
-    }
-
     public static InputStream open(String resource) {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-    }
-
-    public static String getString(String resource) {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(open(resource), StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static ByteBuffer getBuffer(String resource) {

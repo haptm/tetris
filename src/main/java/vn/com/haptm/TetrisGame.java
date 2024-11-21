@@ -19,11 +19,11 @@ import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_R;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
@@ -92,7 +92,7 @@ public class TetrisGame {
         texture = new Texture("textures/spritesheet.png");
         texture.bind();
 
-        tetris = new Game(new Game.Config());
+        tetris = new Game();
 
         sprites = new Sprites();
         labels = new Labels();
@@ -100,29 +100,33 @@ public class TetrisGame {
         batch = new Batch(2048);
     }
 
-    private static Sprite createBGSprite() {
+    // màu ô trong nền
+    private static Sprite createBoardPieceSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 1, 1);
         sprite.color.set(1, 1, 1);
         return sprite;
     }
 
-    private static Sprite createBG2Sprite() {
+    // màu nền hold next
+    private static Sprite createHNSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 1, 1);
         sprite.color.set(.9f, .95f, .9f);
         return sprite;
     }
 
-    private static Sprite createBG3Sprite() {
+    // màu nền khi hold có khối mới
+    private static Sprite createHoldNewSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 1, 1);
-        sprite.color.set(.2f, .3f, .2f);
-        sprite.alpha = .75f;
+        sprite.color.set(1,1,1);
+        sprite.alpha = 0.75f;
         return sprite;
     }
 
-    private static Sprite createBG4Sprite() {
+    // nền game over
+    private static Sprite createGameOverSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 1, 1);
         sprite.color.set(.08f, .10f, .08f);
@@ -130,7 +134,7 @@ public class TetrisGame {
         return sprite;
     }
 
-    // khung board
+    // màu nền board
     private static Sprite createBoardBGPieceSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 8, 8);
@@ -139,7 +143,7 @@ public class TetrisGame {
     }
 
     // shape trong next và hold
-    private static Sprite createBoardFGPieceSprite() {
+    private static Sprite createBoardHNPieceSprite() {
         final Sprite sprite = new Sprite();
         sprite.textureRegion = texture.region(0, 64, 8, 8);
         sprite.color.set(0, .1f, 0);
@@ -297,7 +301,7 @@ public class TetrisGame {
         if (Inputs.isDown(GLFW_KEY_RIGHT, 0.16f, 0.04f)) dx++;
         if (Inputs.isDown(GLFW_KEY_DOWN, 0.16f, 0.04f)) fall = true;
         if (Inputs.isDown(GLFW_KEY_SPACE, 1, 1)) drop = true;
-        if (Inputs.isDown(GLFW_KEY_LEFT_CONTROL, 1, 1)) hold = true;
+        if (Inputs.isDown(GLFW_KEY_UP, 1, 1)) hold = true;
         if (Inputs.isDown(GLFW_KEY_X, 0.16f, 0.04f)) rotate = 1;
         if (Inputs.isDown(GLFW_KEY_Z, 0.16f, 0.04f)) rotate = -1;
 
@@ -317,7 +321,7 @@ public class TetrisGame {
     }
 
     public static void renderBoard() {
-        renderBG(sprites.bg, 5, 0, tetris.board.width, tetris.board.height);
+        renderBG(sprites.boardPiece, 5, 0, tetris.board.width, tetris.board.height);
         for (var y = 0; y < tetris.board.height; y++) {
             var isFullRow = tetris.board.isFullRow(y);
             for (var x = 0; x < tetris.board.width; x++) {
@@ -353,7 +357,7 @@ public class TetrisGame {
     }
 
     public static void renderShapeBox(Shape shape, Sprite spt, float x, float y) {
-        renderBG(sprites.bg2, x, y, 4, 4);
+        renderBG(sprites.holdNextBG, x, y, 4, 4);
         if (shape.size > 0) {
             var wx = x + 2 - shape.centerX;
             var wy = y + 2 - shape.centerY;
@@ -406,8 +410,8 @@ public class TetrisGame {
     }
 
     public static void render(double time) {
-        sprites.pieces.player.color.set(0f, 0.0f, 1f);
-        sprites.pieces.shadow.color.set(0f, 0.0f, 1f);
+        sprites.pieces.player.color.set(0, 0, 1);
+        sprites.pieces.shadow.color.set(0, 0, 1);
         sprites.pieces.shadow.alpha = .5f;
 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -420,12 +424,12 @@ public class TetrisGame {
             renderShapeBox(tetris.next, sprites.pieces.boardFG, 0, 1);
             renderShapeBox(tetris.hold, sprites.pieces.boardFG, 0, 7);
             if (!tetris.canHold)
-                renderBG(sprites.bg3, 0, 7, 4, 4);
+                renderBG(sprites.holdNewBG, 0, 7, 4, 4);
         }
         if (tetris.gameOver) {
-            renderBG(sprites.bg4, 5, 0, tetris.board.width, tetris.board.height);
-            renderBG(sprites.bg4, 0, 1, 4, 4);
-            renderBG(sprites.bg4, 0, 7, 4, 4);
+            renderBG(sprites.gameOverBG, 5, 0, tetris.board.width, tetris.board.height);
+            renderBG(sprites.gameOverBG, 0, 1, 4, 4);
+            renderBG(sprites.gameOverBG, 0, 7, 4, 4);
             renderGameOver();
         }
         renderTime();
@@ -451,15 +455,15 @@ public class TetrisGame {
     }
 
     private static final class Sprites {
-        public Sprite bg = createBGSprite();
-        public Sprite bg2 = createBG2Sprite();
-        public Sprite bg3 = createBG3Sprite();
-        public Sprite bg4 = createBG4Sprite();
+        public Sprite boardPiece = createBoardPieceSprite();
+        public Sprite holdNextBG = createHNSprite();
+        public Sprite holdNewBG = createHoldNewSprite();
+        public Sprite gameOverBG = createGameOverSprite();
         public Pieces pieces = new Pieces();
 
         public static final class Pieces {
             public Sprite boardBG = createBoardBGPieceSprite();
-            public Sprite boardFG = createBoardFGPieceSprite();
+            public Sprite boardFG = createBoardHNPieceSprite();
             public Sprite clear = createClearPieceSprite();
             public Sprite player = createPlayerPieceSprite();
             public Sprite shadow = createShadowPieceSprite();
