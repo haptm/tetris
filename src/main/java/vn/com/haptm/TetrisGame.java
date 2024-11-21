@@ -255,7 +255,7 @@ public class TetrisGame {
     private static Label createNextLabel() {
         final Label label = new Label();
         label.text = "NEXT";
-        label.x = 0;
+        label.x = 0.4f;
         label.y = 5.25f;
         label.size = .65f;
         label.hAlign = Label.HAlign.LEFT;
@@ -266,7 +266,7 @@ public class TetrisGame {
     private static Label createHoldLabel() {
         final Label label = new Label();
         label.text = "HOLD";
-        label.x = 0;
+        label.x = 0.4f;
         label.y = 11.5f;
         label.size = .65f;
         label.hAlign = Label.HAlign.LEFT;
@@ -421,10 +421,10 @@ public class TetrisGame {
         if (!paused) {
             renderShape(tetris.shadow, sprites.pieces.shadow, 5, 0);
             renderShape(tetris.player, sprites.pieces.player, 5, 0);
-            renderShapeBox(tetris.next, sprites.pieces.boardFG, 0, 1);
-            renderShapeBox(tetris.hold, sprites.pieces.boardFG, 0, 7);
+            renderShapeBox(tetris.next, sprites.pieces.boardFG, 0.5f, 1);
+            renderShapeBox(tetris.hold, sprites.pieces.boardFG, 0.5f, 7);
             if (!tetris.canHold)
-                renderBG(sprites.holdNewBG, 0, 7, 4, 4);
+                renderBG(sprites.holdNewBG, 0.5f, 7, 4, 4);
         }
         if (tetris.gameOver) {
             renderBG(sprites.gameOverBG, 5, 0, tetris.board.width, tetris.board.height);
