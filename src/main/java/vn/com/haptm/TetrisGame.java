@@ -13,6 +13,7 @@ import vn.com.haptm.inputs.Inputs;
 import vn.com.haptm.mat4f.Mat4f;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Objects;
@@ -53,17 +54,27 @@ public class TetrisGame {
     private static boolean paused;
 
     public static String getHighScore() {
-        String highScore;
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/highScore.txt"));
-            String line =  reader.readLine();
-            highScore = Objects.requireNonNullElse(line, "0");
+        // Đường dẫn đến tệp highScore.txt trong thư mục người dùng
+        String filePath = System.getProperty("user.home") + "/highScore.txt";
+        String highScore = "0"; // Giá trị mặc định nếu không đọc được tệp
 
+       // Kiểm tra nếu tệp không tồn tại, tạo mới
+        File file = new File(filePath);
+
+        // Đọc nội dung từ tệp
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine();
+            highScore = Objects.requireNonNullElse(line, "0"); // Trả về "0" nếu không có nội dung
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            // Xử lý lỗi nếu có sự cố khi đọc tệp
+            System.err.println("IOException occurred: " + e.getMessage());
+            e.printStackTrace();
         }
-        return highScore;
+
+        return highScore; // Trả về điểm cao đã đọc được
     }
+
+
 
     public static String formatTime(double t) {
         var s = (int) t;

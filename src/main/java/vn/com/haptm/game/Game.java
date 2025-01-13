@@ -2,9 +2,12 @@ package vn.com.haptm.game;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class Game {
     private static final Shape[] SHAPES;
@@ -79,23 +82,80 @@ public class Game {
     public boolean gameOver;
     private int highScore;
 
+//    private int readHighScore() {
+//        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/highScore.txt"))) {
+//            String line = reader.readLine();
+//            if (line != null) {
+//                return Integer.parseInt(line.trim());
+//            }
+//        } catch (IOException | NumberFormatException e) {
+//            return 0;
+//        }
+//        return 0;
+//    }
+
+//    private int readHighScore() {
+//        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("highScore.txt")) {
+//            if (inputStream == null) {
+//                System.out.println("File not found: highScore.txt");
+//                return 0; // Giá trị mặc định nếu không tìm thấy tệp
+//            }
+//
+//            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+//                String line = reader.readLine();
+//                if (line != null) {
+//                    return Integer.parseInt(line.trim());
+//                }
+//            }
+//        } catch (IOException | NumberFormatException e) {
+//            e.printStackTrace(); // In lỗi để kiểm tra
+//            return 0; // Giá trị mặc định khi có lỗi
+//        }
+//        return 0; // Giá trị mặc định nếu không đọc được
+//    }
+//
+//
+//    private void writeHighScore() {
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/highScore.txt"))) {
+//            writer.write(String.valueOf(this.highScore));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     private int readHighScore() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/highScore.txt"))) {
+        String filePath = System.getProperty("user.home") + "/highScore.txt"; // Đường dẫn tệp lưu trữ
+
+        // Kiểm tra nếu tệp không tồn tại, tạo mới
+        File file = new File(filePath);
+        if (!file.exists()) {
+            System.out.println("File not found, creating new highScore.txt");
+            writeHighScore(); // Tạo tệp mới với điểm mặc định
+            return 0; // Trả về điểm mặc định nếu tệp chưa tồn tại
+        }
+
+        // Đọc nội dung từ tệp
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line = reader.readLine();
-            if (line != null) {
-                return Integer.parseInt(line.trim());
+            if (line != null && !line.trim().isEmpty()) {
+                return Integer.parseInt(line.trim()); // Chuyển chuỗi thành số nguyên
             }
         } catch (IOException | NumberFormatException e) {
-            return 0;
+            e.printStackTrace(); // In ra lỗi để kiểm tra
         }
-        return 0;
+        return 0; // Trả về giá trị mặc định khi có lỗi
     }
 
+    // Ghi điểm cao vào tệp
     private void writeHighScore() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/highScore.txt"))) {
-            writer.write(String.valueOf(this.highScore));
+        String filePath = System.getProperty("user.home") + "/highScore.txt"; // Đường dẫn tệp lưu trữ
+
+        // Tạo tệp mới hoặc ghi vào tệp nếu nó đã tồn tại
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(String.valueOf(this.highScore)); // Ghi điểm số vào tệp
+            System.out.println("High score saved to " + filePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // In ra lỗi nếu có sự cố
         }
     }
 
